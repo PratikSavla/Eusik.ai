@@ -3,7 +3,7 @@ import imutils
 import cv2
 from keras.models import load_model
 import numpy as np
-
+import playsound
 # parameters for loading data and images
 detection_model_path = 'haarcascade_files/haarcascade_frontalface_default.xml'
 emotion_model_path = 'models/_mini_XCEPTION.102-0.66.hdf5'
@@ -23,7 +23,11 @@ EMOTIONS = ["angry" ,"disgust","scared", "happy", "sad", "surprised",
 # starting video streaming
 cv2.namedWindow('your_face')
 camera = cv2.VideoCapture(0)
+iii=0
 while True:
+    iii=iii+1
+    if iii > 50:
+        iii=0
     frame = camera.read()[1]
     #reading the frame
     frame = imutils.resize(frame,width=300)
@@ -48,6 +52,7 @@ while True:
         preds = emotion_classifier.predict(roi)[0]
         emotion_probability = np.max(preds)
         label = EMOTIONS[preds.argmax()]
+    
 
  
     for (i, (emotion, prob)) in enumerate(zip(EMOTIONS, preds)):
@@ -72,8 +77,13 @@ while True:
 #        frame[200:320, 10:130, c] = emoji_face[:, :, c] * \
 #        (emoji_face[:, :, 3] / 255.0) + frame[200:320,
 #        10:130, c] * (1.0 - emoji_face[:, :, 3] / 255.0)
-
-
+    tee = []
+    for (i, (emotion, prob)) in enumerate(zip(EMOTIONS, preds)):
+        tee.append(prob)
+    s_name = tee.index(max(tee))
+    if iii == 50:
+    	playsound.playsound(str(s_name)+".mp3",True)
+    	print("song no:",s_name)
     cv2.imshow('your_face', frameClone)
     cv2.imshow("Probabilities", canvas)
     if cv2.waitKey(1) & 0xFF == ord('q'):
